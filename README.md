@@ -8,191 +8,268 @@ python_version: "3.11"
 app_file: app.py
 pinned: false
 ---
-# 🧠 NL2SQL Copilot — Prototype
+# 🧠 NL2SQL Copilot — Archived Prototype
 
-A minimal **Text-to-SQL Copilot** built with **LangChain + Gradio**, designed to translate natural language questions into **safe SQL** and run them on a **read-only SQLite** database.
+> **Archived prototype**
+>
+> This repository preserves the original v0.1 Gradio prototype of NL2SQL Copilot.
+> Active development continued in the successor project:
+> [melika-kheirieh/nl2sql-copilot](https://github.com/melika-kheirieh/nl2sql-copilot).
+>
+> This prototype is preserved for historical reference and is no longer actively maintained.
+
+A minimal **Text-to-SQL Copilot** built with **LangChain and Gradio**.
+
+It translates natural-language questions into guarded, read-only SQL queries, validates them before execution, and runs approved queries against an uploaded SQLite database.
 
 👉 [Live Demo on Hugging Face Spaces](https://huggingface.co/spaces/melikakheirieh/nl2sql-copilot-prototype)
 
+---
 
-> **Status:** Prototype (v0.1). This demonstrates structure and UX; advanced safety/verification pipelines are planned.
+## What This Prototype Demonstrates
+
+* Gradio-based interactive UI
+* Natural-language-to-SQL generation with LangChain
+* Configurable OpenAI-compatible LLM provider
+* Uploaded SQLite database support
+* Schema inspection before SQL generation
+* SQL parsing with `sqlglot`
+* Single-statement enforcement
+* `SELECT`-only validation
+* Blocking of forbidden SQL keywords and internal SQLite tables
+* Read-only SQLite execution
+* Configurable result row limits
+* Environment-based secret management
+
+This is an early prototype, not a production-grade SQL security boundary.
 
 ---
 
-## ✨ Features (v0.1)
-- Gradio UI for quick interactions
-- Config-driven environment (dotenv)
-- Pluggable LLM endpoint (proxy or direct OpenAI)
-- SQLite **read-only** connection (no data mutation)
+## Project Structure
 
-**Planned next:**
-- Query planning and verification
-- Safer SQL guardrails (AST / blocklist / dialect checks)
-- Self-repair on failed queries
-- Semantic cache and telemetry
-
----
-
-## 📂 Project Structure
-```
+```text
 nl2sql-copilot-prototype/
-├─ app.py
-├─ config.py
-├─ requirements.txt
-├─ .env.example
-├─ .gitignore
-└─ README.md
-
+├── app.py
+├── config.py
+├── requirements.txt
+├── .env.example
+├── .gitignore
+├── README.md
+└── db/
+    ├── Chinook_Sqlite.sqlite
+    └── WMSales.sqlite
 ```
-## 🧩 Database Samples
-
-Two example SQLite databases are included in the `db/` folder for quick testing:
-
-| File | Description | Download |
-|------|--------------|-----------|
-| **Chinook_Sqlite.sqlite** | Classic sample DB with artists, albums, and tracks (music store example). | [⬇️ Download](https://github.com/melika-kheirieh/nl2sql-copilot-prototype/raw/main/db/Chinook_Sqlite.sqlite) |
-| **WMSales.sqlite** | Simple sales database (for demoing aggregate and filter queries). | [⬇️ Download](https://github.com/melika-kheirieh/nl2sql-copilot-prototype/raw/main/db/WMSales.sqlite) |
-
-You can use them directly in the Gradio UI by uploading one of these files, or reference them in code for local runs.
 
 ---
 
-### 🧠 Sample Questions for *Chinook_Sqlite.sqlite*
-Try asking your copilot questions like:
+## Database Samples
 
-1. “List the top 5 artists by total track count.”  
-2. “Which album has the most tracks?”  
-3. “Show all tracks longer than 6 minutes.”  
-4. “Find the average track length by genre.”
-5. “Show total invoice amount by billing country.”
-6. “Top 10 most popular genres by number of tracks.”
-7. “How many customers have purchased Jazz albums?”
-8. “Show the total revenue by employee (sales support).”
-9. “List customers who spent more than $100.” 
-10. “Which customers are from Canada?”  
+Two example SQLite databases are included in the `db/` directory for local testing.
 
+| File                    | Description                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| `Chinook_Sqlite.sqlite` | A sample music-store database containing artists, albums, tracks, customers, and invoices |
+| `WMSales.sqlite`        | A sample sales database for aggregation, filtering, and reporting queries                 |
+
+You can upload either database through the Gradio interface or use another `.sqlite` or `.db` file.
 
 ---
 
-### 📊 Sample Questions for *WMSales.sqlite*
-You can try:
+## Example Questions
 
-1. “Show total sales per month in 2024.”  
-2. “List the top 10 customers by revenue.”  
-3. “Which product category had the highest sales this year?”  
-4. “Find the average unit price per product.”  
-5. “Show all orders placed in the last 30 days.”  
-6. “List total sales by region and salesperson.”  
-7. “What is the best-selling product overall?”  
-8. “Show total discount given per month.”  
-9. “Find customers who made more than 5 purchases.”  
-10. “What’s the total revenue by payment method?”
+### Chinook Database
+
+* List the top five artists by total track count.
+* Which album contains the most tracks?
+* Show all tracks longer than six minutes.
+* Find the average track length by genre.
+* Show total invoice revenue by billing country.
+* List the ten most popular genres by number of tracks.
+* How many customers purchased Jazz albums?
+* Show total revenue by sales support employee.
+* List customers who spent more than $100.
+* Which customers are located in Canada?
+
+### Sales Database
+
+* Show total sales per month in 2024.
+* List the top ten customers by revenue.
+* Which product category had the highest sales?
+* Find the average unit price per product.
+* Show orders placed during the last 30 days.
+* List total sales by region and salesperson.
+* What is the best-selling product?
+* Show the total discount given per month.
+* Find customers who made more than five purchases.
+* What is the total revenue by payment method?
+
 ---
 
-## ⚙️ Requirements
-- Python 3.10+
-- A proxy/provider API key (OpenAI / custom proxy)
-- SQLite DB file (uploaded via UI)
+## Requirements
+
+* Python 3.10 or newer
+* An OpenAI-compatible API key
+* A SQLite database file
 
 ---
 
-## 🔐 Environment Variables
+## Environment Variables
 
-Copy the example and fill your own values:
+Copy the example environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-`.env.example` (proxy-agnostic):
-```bash
-# ---- LLM provider or proxy (preferred) ----
-PROXY_API_KEY="your-proxy-or-provider-api-key"
-PROXY_BASE_URL="https://your-proxy-or-provider-base-url/v1"
+Configure either a custom OpenAI-compatible provider:
 
-# ---- Optional direct OpenAI fallback ----
-#OPENAI_API_KEY="your-openai-api-key"
-#OPENAI_BASE_URL="https://api.openai.com/v1"
+```env
+PROXY_API_KEY="your-provider-api-key"
+PROXY_BASE_URL="https://your-provider-base-url/v1"
+OPENAI_MODEL="gpt-4o-mini"
+LLM_TEMPERATURE="0"
 ```
 
-`config.py` should select `PROXY_*` first; if empty, it falls back to `OPENAI_*`.
+Or use OpenAI directly:
+
+```env
+OPENAI_API_KEY="your-openai-api-key"
+OPENAI_BASE_URL="https://api.openai.com/v1"
+OPENAI_MODEL="gpt-4o-mini"
+LLM_TEMPERATURE="0"
+```
+
+The application checks the `PROXY_*` variables first and falls back to the corresponding `OPENAI_*` variables.
+
+Never commit a real `.env` file or API key.
 
 ---
 
-## 🧪 Local Quickstart
+## Local Quickstart
+
+Create and activate a virtual environment:
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env           # then edit .env and add your keys
-python app.py                 # open the Gradio link in browser
+source .venv/bin/activate
 ```
 
-Upload a SQLite file and try a prompt like:
-> “Top 5 customers by total orders in 2024.”
+On Windows:
+
+```bash
+.venv\Scripts\activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Create the local environment file:
+
+```bash
+cp .env.example .env
+```
+
+Add your provider credentials to `.env`, then run the application:
+
+```bash
+python app.py
+```
+
+Open the Gradio URL displayed in the terminal.
+
+Upload a SQLite database and ask a question such as:
+
+> Show the top five customers by total revenue.
 
 ---
 
-## 🧰 Safety Notes (Prototype)
-- DB is opened in **read-only** mode, but you should still block multi-statement payloads and dangerous tokens (e.g., `ATTACH`, `PRAGMA`, `sqlite_master`, DDL/INSERT/UPDATE/DELETE).
-- Consider an AST approach (e.g., `sqlglot`) for a stricter parse/allow-list.
+## Query Validation
+
+Before execution, generated SQL passes through a lightweight validation layer.
+
+The prototype:
+
+* rejects multiple SQL statements
+* parses SQL using the SQLite dialect
+* accepts only a single `SELECT` statement
+* rejects configured mutation and administration keywords
+* blocks access to internal SQLite tables
+* executes the query through a read-only SQLite connection
+* adds a result limit when the generated query does not contain one
+
+These checks reduce obvious risks but should not be treated as a complete production security model.
+
+Production systems should also consider:
+
+* database-level permissions
+* isolated execution environments
+* query cost and timeout enforcement
+* schema and column allowlists
+* tenant-aware access control
+* audit logging
+* sensitive-data policies
+* adversarial and regression testing
 
 ---
 
-## ☁️ Deploy to Hugging Face Spaces (Gradio)
+## Deploying to Hugging Face Spaces
 
-### 1) Create a new Space
-- Go to Hugging Face → Spaces → **New Space**
-- **Name:** `nl2sql-copilot-prototype`
-- **Space SDK:** Gradio
-- **Hardware:** CPU Basic
-- **Visibility:** Public (or Private)
+Create a new Hugging Face Space with the following settings:
 
-### 2) Add project files
-Commit/push these files to the Space repo:
-- `app.py`, `config.py`, `requirements.txt`, `.env.example`, `README.md`, `.gitignore`
+* SDK: Gradio
+* Python: 3.11
+* Application file: `app.py`
+* Hardware: CPU Basic
 
-### 3) Set Secrets (Variables and secrets)
-In Space → **Settings → Variables and secrets**:
-- `PROXY_API_KEY`: your real key
-- `PROXY_BASE_URL`: e.g., `https://.../v1`
-- (Optional) `OPENAI_API_KEY` and `OPENAI_BASE_URL`
+Add the project files to the Space repository.
 
-> Do **not** commit a real `.env`. Use Space **Secrets**.
+In the Space settings, configure the required secrets:
 
-### 4) Build & Run
-- Spaces auto-install from `requirements.txt`.
-- If not auto-started, set **App file: main.py**, SDK: **Gradio**, Python: **3.10+**.
+```text
+PROXY_API_KEY
+PROXY_BASE_URL
+OPENAI_MODEL
+```
 
-### 5) Test
-- Open Space URL
-- Upload a small sample SQLite DB
-- Check **Logs** tab for errors
+Alternatively, configure:
 
-**Persistence note:** Uploads are ephemeral; include a tiny demo DB in the repo if needed.
+```text
+OPENAI_API_KEY
+OPENAI_BASE_URL
+OPENAI_MODEL
+```
 
----
+Do not commit API keys to the repository.
 
-## 🧭 Usage Tips
-- Prefer concise prompts (e.g., “Show avg price by category for 2023”).
-- If a query fails, rephrase or reduce columns.
-- For bigger DBs, add a schema introspection step or a “Describe tables” helper.
+Uploaded databases are temporary in the default Hugging Face Spaces environment.
 
 ---
 
-## 🛡️ Security & Privacy
-- Never log raw API keys.
-- Keep `.env` out of Git; commit only `.env.example`.
-- Enforce read-only and block multi-statement SQL.
+## Limitations
+
+This prototype does not include:
+
+* user authentication or authorization
+* tenant isolation
+* database permission management
+* comprehensive SQL policy enforcement
+* query planning or cost estimation
+* automated SQL repair
+* evaluation and regression datasets
+* production observability
+* persistent audit records
+* PostgreSQL support
+* a dedicated backend API
+
+These concerns are addressed more systematically in the successor project.
 
 ---
 
-## 🗺️ Roadmap
-- [ ] Planner → Generator → Safety → Executor → Verifier loop
-- [ ] AST-based guardrails (sqlglot)
-- [ ] Self-repair on DB/SQL errors
-- [ ] Semantic cache + telemetry
-- [ ] Streamlit / FastAPI variants
+## Successor Project
 
+The actively developed version includes a FastAPI backend and stronger engineering boundaries around SQL generation, validation, verification, bounded repair, evaluation, observability, and failure handling.
 
+➡️ [NL2SQL Copilot](https://github.com/melika-kheirieh/nl2sql-copilot)
